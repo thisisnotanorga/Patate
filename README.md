@@ -12,4 +12,4 @@ Idk it's hosted on [patate.theserver.life](https://patate.theserver.life)
 
 
 ---
-Made by oldvador, douxx
+Made by oldwalor, douxx
