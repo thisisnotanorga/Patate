@@ -15,7 +15,9 @@ let patate = {
     velocityX: 0,
     velocityY: 0,
     gravity: 0.3,
+    baseGravity: 0.3,
     jumpPower: -9,
+    baseJumpPower: -9,
     onGround: true,
     firstPlatformTouched: false
 };
@@ -29,13 +31,43 @@ let ground = {
 };
 
 let platforms = [];
-const minSpacing = 60;
-const maxSpacing = 110;
+let minSpacing = 60;
+let maxSpacing = 110;
 let lastY = canvas.height - 60;
 
 let gamePaused = false;
 let gameOver = false;
 let score = 0;
+
+function adjustDifficulty() {
+    if (score > 50) {
+        minSpacing = 100;
+        maxSpacing = 150;
+        
+        if (score <= 100) {
+            patate.gravity = patate.baseGravity * 0.8;
+            patate.jumpPower = patate.baseJumpPower * 1.15;
+        } else {
+            patate.gravity = patate.baseGravity;
+            patate.jumpPower = patate.baseJumpPower;
+        }
+    }
+
+    if (score > 100 && score <= 200) {
+        platforms.forEach(plat => {
+            plat.type = "boost";
+        });
+    }
+
+    if (score > 200) {
+        minSpacing = 150;
+        maxSpacing = 200;
+        platforms.forEach(plat => {
+            plat.y += 2;
+        });
+    }
+}
+
 
 function generatePlatforms() {
     const maxJumpHeight = Math.abs(patate.jumpPower * patate.jumpPower / (2 * patate.gravity));
@@ -67,6 +99,7 @@ function generatePlatforms() {
         });
     }
 }
+
 
 generatePlatforms();
 
@@ -162,6 +195,8 @@ restartButton.addEventListener("click", restartGame);
 function update() {
     if (gameOver || gamePaused) return;
     
+    adjustDifficulty();
+
     patate.velocityY += patate.gravity;
     patate.y += patate.velocityY;
 
