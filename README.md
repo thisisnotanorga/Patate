@@ -9,6 +9,7 @@ Idk it's hosted on [patate.theserver.life](https://patate.theserver.life)
 - Fixed fist platform height
 - Added game menu when doing escape
 - Translated FR -> EN
+- Ajusted difficulty
 
 
 ---
