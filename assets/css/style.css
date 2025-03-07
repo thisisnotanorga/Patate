@@ -1,0 +1,63 @@
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #f4d03f;
+    overflow: hidden;
+    margin: 0;
+}
+
+h1 {
+    color: #d35400;
+}
+
+canvas {
+    background-color: #a2d9ce;
+    display: block;
+    margin: 0 auto;
+    border: 3px solid #27ae60;
+}
+
+#score {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#gameOverScreen, #pauseMenu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    z-index: 1000;
+}
+
+#gameOverScreen h1, #pauseMenu h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: white;
+}
+
+#gameOverScreen p, #pauseMenu p {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+#restartButton, #continueButton, #restartFromPauseButton {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+#restartButton:hover, #continueButton:hover, #restartFromPauseButton:hover {
+    background-color: #45a049;
+}
