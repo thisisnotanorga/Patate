@@ -4,11 +4,9 @@ const ctx = canvas.getContext("2d");
 canvas.width = 400;
 canvas.height = 600;
 
-// Charger l'image de la patate
 const patateImg = new Image();
-patateImg.src = "patate.png"; // Ajoute une image "patate.png" dans ton dossier
+patateImg.src = "assets/img/patate.png";
 
-// La patate
 let patate = {
     x: canvas.width / 2 - 20,
     y: canvas.height - 60,
@@ -17,12 +15,11 @@ let patate = {
     velocityX: 0,
     velocityY: 0,
     gravity: 0.3,
-    jumpPower: -9, // Augmenté pour un saut plus haut
+    jumpPower: -9,
     onGround: true,
     firstPlatformTouched: false
 };
 
-// Sol de départ (fixe en bas)
 let ground = {
     x: 0,
     y: canvas.height - 20,  
@@ -31,15 +28,32 @@ let ground = {
     visible: true 
 };
 
-// Plateformes générées aléatoirement
 let platforms = [];
-const minSpacing = 60;  // Espacement minimum entre les plateformes
-const maxSpacing = 110; // Espacement maximum entre les plateformes
-let lastY = canvas.height - 60; // Position de départ de la première plateforme
+const minSpacing = 60;
+const maxSpacing = 110;
+let lastY = canvas.height - 60;
 
-// Générer les plateformes initiales
+let gamePaused = false;
+let gameOver = false;
+let score = 0;
+
 function generatePlatforms() {
-    for (let i = 0; i < 20; i++) {  
+    const maxJumpHeight = Math.abs(patate.jumpPower * patate.jumpPower / (2 * patate.gravity));
+    
+    const firstPlatformY = ground.y - (maxJumpHeight * 0.8);
+    
+    platforms.push({
+        x: Math.random() * (canvas.width - 80),
+        y: firstPlatformY,
+        width: 80,
+        height: 10,
+        type: "normal",
+        touched: false
+    });
+    
+    lastY = firstPlatformY;
+    
+    for (let i = 0; i < 19; i++) { 
         let spacing = Math.random() * (maxSpacing - minSpacing) + minSpacing;
         lastY -= spacing;
 
@@ -49,25 +63,28 @@ function generatePlatforms() {
             width: 80,
             height: 10,
             type: Math.random() > 0.8 ? "boost" : "normal",
-            touched: false // Nouvelle propriété pour suivre si la plateforme a été touchée
+            touched: false
         });
     }
 }
 
 generatePlatforms();
 
-let score = 0;
-
-// Contrôles
 let moveLeft = false;
 let moveRight = false;
 
 document.addEventListener("keydown", (event) => {
+    if (gameOver) return;
+    
     if (event.key === "ArrowLeft") moveLeft = true;
     if (event.key === "ArrowRight") moveRight = true;
     if (event.key === " " && patate.onGround) {
         patate.velocityY = patate.jumpPower;
         patate.onGround = false;
+    }
+    
+    if (event.key === "Escape") {
+        togglePause();
     }
 });
 
@@ -76,27 +93,75 @@ document.addEventListener("keyup", (event) => {
     if (event.key === "ArrowRight") moveRight = false;
 });
 
-// Récupérer l'écran de fin de jeu et le bouton de redémarrage
 const gameOverScreen = document.getElementById("gameOverScreen");
 const finalScoreElement = document.getElementById("finalScore");
 const restartButton = document.getElementById("restartButton");
 
-// Fonction pour afficher l'écran de fin de jeu
+const pauseMenu = document.createElement("div");
+pauseMenu.id = "pauseMenu";
+pauseMenu.style.display = "none";
+pauseMenu.innerHTML = `
+    <h1>Game Paused</h1>
+    <p>Score actuel: <span id="pauseScore">0</span></p>
+    <button id="continueButton">Continue</button>
+    <button id="restartFromPauseButton">Restart</button>
+`;
+document.body.appendChild(pauseMenu);
+
+pauseMenu.style.position = "absolute";
+pauseMenu.style.top = "50%";
+pauseMenu.style.left = "50%";
+pauseMenu.style.transform = "translate(-50%, -50%)";
+pauseMenu.style.textAlign = "center";
+pauseMenu.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+pauseMenu.style.color = "white";
+pauseMenu.style.padding = "20px";
+pauseMenu.style.borderRadius = "10px";
+pauseMenu.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.5)";
+pauseMenu.style.zIndex = "1000";
+
+const buttons = pauseMenu.querySelectorAll("button");
+buttons.forEach(button => {
+    button.style.padding = "10px 20px";
+    button.style.fontSize = "1.2em";
+    button.style.backgroundColor = "#4CAF50";
+    button.style.color = "white";
+    button.style.border = "none";
+    button.style.borderRadius = "5px";
+    button.style.cursor = "pointer";
+    button.style.margin = "10px";
+});
+
+document.getElementById("continueButton").addEventListener("click", togglePause);
+document.getElementById("restartFromPauseButton").addEventListener("click", restartGame);
+
+function togglePause() {
+    gamePaused = !gamePaused;
+    
+    if (gamePaused) {
+        pauseMenu.style.display = "block";
+        document.getElementById("pauseScore").textContent = score;
+    } else {
+        pauseMenu.style.display = "none";
+        requestAnimationFrame(update);
+    }
+}
+
 function showGameOverScreen() {
-    gameOverScreen.style.display = "block"; // Afficher l'écran
-    finalScoreElement.textContent = score; // Afficher le score final
+    gameOver = true;
+    gameOverScreen.style.display = "block";
+    finalScoreElement.textContent = score;
 }
 
-// Fonction pour redémarrer le jeu
 function restartGame() {
-    document.location.reload(); // Recharge la page pour redémarrer le jeu
+    document.location.reload();
 }
 
-// Ajouter un gestionnaire d'événement pour le bouton de redémarrage
 restartButton.addEventListener("click", restartGame);
 
-// Mise à jour du jeu
 function update() {
+    if (gameOver || gamePaused) return;
+    
     patate.velocityY += patate.gravity;
     patate.y += patate.velocityY;
 
@@ -106,18 +171,15 @@ function update() {
 
     patate.x += patate.velocityX;
 
-    // Collision avec le sol
     if (ground.visible && patate.y + patate.height >= ground.y) {
         patate.y = ground.y - patate.height;
         patate.velocityY = 0;
         patate.onGround = true;
     }
 
-    // Gestion des bords gauche et droit
     if (patate.x + patate.width < 0) patate.x = canvas.width;
     else if (patate.x > canvas.width) patate.x = -patate.width;
 
-    // Déplacement des plateformes lorsque la patate monte
     if (patate.y < canvas.height / 2) {
         platforms.forEach((plat) => {
             plat.y += Math.abs(patate.velocityY);
@@ -125,8 +187,7 @@ function update() {
                 plat.y = -10;
                 plat.x = Math.random() * (canvas.width - 80);
                 plat.type = Math.random() > 0.8 ? "boost" : "normal";
-                plat.touched = false; // Réinitialiser la propriété "touched" pour les nouvelles plateformes
-
+                plat.touched = false; 
                 let lastPlatform = platforms.reduce((a, b) => (a.y < b.y ? a : b));
 
                 let newY = lastPlatform.y - (minSpacing + Math.random() * (maxSpacing - minSpacing));
@@ -152,27 +213,24 @@ function update() {
         });
     }
 
-    // Collision avec les plateformes
     platforms.forEach((plat) => {
-        // Vérifier si la patate est en train de traverser la plateforme
         if (
-            patate.velocityY > 0 && // La patate tombe
-            patate.y + patate.height > plat.y && // La patate est au-dessus de la plateforme
-            patate.y + patate.height - patate.velocityY <= plat.y && // La patate était au-dessus de la plateforme avant cette frame
-            patate.x + patate.width > plat.x && // La patate est à droite de la plateforme
-            patate.x < plat.x + plat.width // La patate est à gauche de la plateforme
+            patate.velocityY > 0 &&
+            patate.y + patate.height > plat.y &&
+            patate.y + patate.height - patate.velocityY <= plat.y &&
+            patate.x + patate.width > plat.x && 
+            patate.x < plat.x + plat.width
         ) {
-            if (!plat.touched) { // Si la plateforme n'a pas encore été touchée
+            if (!plat.touched) {
                 if (plat.type === "boost") {
-                    score += 5; // Ajoute +5 pour une plateforme rouge
+                    score += 5;
                 } else {
-                    score += 1; // Ajoute +1 pour une plateforme normale
+                    score += 1;
                 }
-                plat.touched = true; // Marquer la plateforme comme touchée
+                plat.touched = true;
                 document.getElementById("score").textContent = "Score : " + score;
             }
 
-            // Ajuster la position de la patate pour qu'elle soit sur la plateforme
             patate.y = plat.y - patate.height;
             patate.velocityY = plat.type === "boost" ? patate.jumpPower * 1.5 : patate.jumpPower;
 
@@ -183,17 +241,15 @@ function update() {
         }
     });
 
-    // Vérifier si la patate est tombée
     if (patate.y > canvas.height) {
-        showGameOverScreen(); // Afficher l'écran de fin de jeu
-        return; // Arrêter la mise à jour du jeu
+        showGameOverScreen();
+        return;
     }
 
     draw();
     requestAnimationFrame(update);
 }
 
-// Dessiner les éléments
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -210,7 +266,6 @@ function draw() {
     ctx.drawImage(patateImg, patate.x, patate.y, patate.width, patate.height);
 }
 
-// Démarrer le jeu
 patateImg.onload = () => {
     update();
 };

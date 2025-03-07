@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patate</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Potato</title>
+    <link href="assets/img/patate.png" rel="icon">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <h1>🥔 Patate</h1>
-    <p>Utilise les flèches gauche/droite pour contrôler la patate et monte le plus haut possible !</p>
-    <p>Touche espace pour commencer</p>
+    <h1>🥔 Potato</h1>
+    <p>Use the left/right arrows to control the potato and climb as high as you can!</p>
+    <p>Space key to start</p>
     <canvas id="gameCanvas"></canvas>
     <p id="score">Score : 0</p>
     <div id="gameOverScreen" style="display: none;">
         <h1>Game Over !</h1>
         <p>Score : <span id="finalScore">0</span></p>
-        <button id="restartButton">Recommencer</button>
+        <button id="restartButton">Restart</button>
     </div>
-    <script src="script.js"></script>
+    <script src="assets/js/game.js"></script>
 </body>
 </html>
