@@ -111,12 +111,16 @@ document.addEventListener("keydown", (event) => {
     
     if (event.key === "ArrowLeft") moveLeft = true;
     if (event.key === "ArrowRight") moveRight = true;
-    if (event.key === " " && patate.onGround) {
+    
+    if (event.key === "a" || event.key === "A") moveLeft = true;
+    if (event.key === "d" || event.key === "D") moveRight = true;
+    
+    if ((event.key === " " || event.key === "w" || event.key === "W") && patate.onGround) {
         patate.velocityY = patate.jumpPower;
         patate.onGround = false;
     }
     
-    if (event.key === "Escape") {
+    if (event.key === "Escape" || event.key === "p" || event.key === "P") {
         togglePause();
     }
 });
@@ -124,6 +128,9 @@ document.addEventListener("keydown", (event) => {
 document.addEventListener("keyup", (event) => {
     if (event.key === "ArrowLeft") moveLeft = false;
     if (event.key === "ArrowRight") moveRight = false;
+    
+    if (event.key === "a" || event.key === "A") moveLeft = false;
+    if (event.key === "d" || event.key === "D") moveRight = false;
 });
 
 const gameOverScreen = document.getElementById("gameOverScreen");
@@ -135,7 +142,7 @@ pauseMenu.id = "pauseMenu";
 pauseMenu.style.display = "none";
 pauseMenu.innerHTML = `
     <h1>Game Paused</h1>
-    <p>Score actuel: <span id="pauseScore">0</span></p>
+    <p>Score: <span id="pauseScore">0</span></p>
     <button id="continueButton">Continue</button>
     <button id="restartFromPauseButton">Restart</button>
 `;
