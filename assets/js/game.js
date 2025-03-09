@@ -7,6 +7,10 @@ canvas.height = 600;
 const patateImg = new Image();
 patateImg.src = "assets/img/patate.png";
 
+let pseudo = "Guest";
+let uid = "";
+let pseudoSubmitted = false;
+
 let patate = {
     x: canvas.width / 2 - 20,
     y: canvas.height - 60,
@@ -24,10 +28,10 @@ let patate = {
 
 let ground = {
     x: 0,
-    y: canvas.height - 20,  
+    y: canvas.height - 20,
     width: canvas.width,
     height: 20,
-    visible: true 
+    visible: true
 };
 
 let platforms = [];
@@ -38,12 +42,15 @@ let lastY = canvas.height - 60;
 let gamePaused = false;
 let gameOver = false;
 let score = 0;
+let lastSubmittedScore = 0;
+let leaderboardInterval = null;
+let scoreSubmitInterval = null;
 
 function adjustDifficulty() {
     if (score > 50) {
         minSpacing = 100;
         maxSpacing = 150;
-        
+
         if (score <= 100) {
             patate.gravity = patate.baseGravity * 0.8;
             patate.jumpPower = patate.baseJumpPower * 1.15;
@@ -68,12 +75,11 @@ function adjustDifficulty() {
     }
 }
 
-
 function generatePlatforms() {
     const maxJumpHeight = Math.abs(patate.jumpPower * patate.jumpPower / (2 * patate.gravity));
-    
+
     const firstPlatformY = ground.y - (maxJumpHeight * 0.8);
-    
+
     platforms.push({
         x: Math.random() * (canvas.width - 80),
         y: firstPlatformY,
@@ -82,10 +88,10 @@ function generatePlatforms() {
         type: "normal",
         touched: false
     });
-    
+
     lastY = firstPlatformY;
-    
-    for (let i = 0; i < 19; i++) { 
+
+    for (let i = 0; i < 19; i++) {
         let spacing = Math.random() * (maxSpacing - minSpacing) + minSpacing;
         lastY -= spacing;
 
@@ -100,7 +106,6 @@ function generatePlatforms() {
     }
 }
 
-
 generatePlatforms();
 
 let moveLeft = false;
@@ -108,18 +113,18 @@ let moveRight = false;
 
 document.addEventListener("keydown", (event) => {
     if (gameOver) return;
-    
+
     if (event.key === "ArrowLeft") moveLeft = true;
     if (event.key === "ArrowRight") moveRight = true;
-    
+
     if (event.key === "a" || event.key === "A") moveLeft = true;
     if (event.key === "d" || event.key === "D") moveRight = true;
-    
+
     if ((event.key === " " || event.key === "w" || event.key === "W") && patate.onGround) {
         patate.velocityY = patate.jumpPower;
         patate.onGround = false;
     }
-    
+
     if (event.key === "Escape" || event.key === "p" || event.key === "P") {
         togglePause();
     }
@@ -128,7 +133,7 @@ document.addEventListener("keydown", (event) => {
 document.addEventListener("keyup", (event) => {
     if (event.key === "ArrowLeft") moveLeft = false;
     if (event.key === "ArrowRight") moveRight = false;
-    
+
     if (event.key === "a" || event.key === "A") moveLeft = false;
     if (event.key === "d" || event.key === "D") moveRight = false;
 });
@@ -137,47 +142,18 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const finalScoreElement = document.getElementById("finalScore");
 const restartButton = document.getElementById("restartButton");
 
-const pauseMenu = document.createElement("div");
-pauseMenu.id = "pauseMenu";
-pauseMenu.style.display = "none";
-pauseMenu.innerHTML = `
-    <h1>Game Paused</h1>
-    <p>Score: <span id="pauseScore">0</span></p>
-    <button id="continueButton">Continue</button>
-    <button id="restartFromPauseButton">Restart</button>
-`;
-document.body.appendChild(pauseMenu);
-
-pauseMenu.style.position = "absolute";
-pauseMenu.style.top = "50%";
-pauseMenu.style.left = "50%";
-pauseMenu.style.transform = "translate(-50%, -50%)";
-pauseMenu.style.textAlign = "center";
-pauseMenu.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-pauseMenu.style.color = "white";
-pauseMenu.style.padding = "20px";
-pauseMenu.style.borderRadius = "10px";
-pauseMenu.style.boxShadow = "0 0 10px rgba(255, 255, 255, 0.5)";
-pauseMenu.style.zIndex = "1000";
-
-const buttons = pauseMenu.querySelectorAll("button");
-buttons.forEach(button => {
-    button.style.padding = "10px 20px";
-    button.style.fontSize = "1.2em";
-    button.style.backgroundColor = "#4CAF50";
-    button.style.color = "white";
-    button.style.border = "none";
-    button.style.borderRadius = "5px";
-    button.style.cursor = "pointer";
-    button.style.margin = "10px";
-});
+const pauseMenu = document.getElementById("pauseMenu");
 
 document.getElementById("continueButton").addEventListener("click", togglePause);
 document.getElementById("restartFromPauseButton").addEventListener("click", restartGame);
 
+document.getElementById("submitChangePseudo").addEventListener("click", createNewAccount);
+document.getElementById("submitFetchUid").addEventListener("click", fetchAccount);
+document.getElementById("skipPseudo").addEventListener("click", skipAccount);
+
 function togglePause() {
     gamePaused = !gamePaused;
-    
+
     if (gamePaused) {
         pauseMenu.style.display = "block";
         document.getElementById("pauseScore").textContent = score;
@@ -191,6 +167,160 @@ function showGameOverScreen() {
     gameOver = true;
     gameOverScreen.style.display = "block";
     finalScoreElement.textContent = score;
+    
+    if (uid) {
+        submitScore();
+    }
+}
+
+window.onload = () => {
+    const storedUid = localStorage.getItem("uid");
+    const storedPseudo = localStorage.getItem("pseudo");
+
+    if (storedUid && storedPseudo) {
+        uid = storedUid;
+        pseudo = storedPseudo;
+        pseudoSubmitted = true;
+        updateProfileDisplay();
+        fetchUserData();
+        hidePseudoForm();
+        startLeaderboardUpdates();
+        if (uid) {
+            startScoreSubmitInterval();
+        }
+    } else {
+        showPseudoForm();
+    }
+};
+
+function updateProfileDisplay() {
+    document.getElementById("profilePseudo").textContent = pseudo || "Guest";
+    document.getElementById("profileUid").textContent = uid || "N/A";
+}
+
+function createNewAccount() {
+    const newPseudo = document.getElementById("changePseudo").value.trim();
+    if (!newPseudo) {
+        showStatusMessage("Veuillez entrer un pseudo valide", "error");
+        return;
+    }
+
+    fetch(`leaderboard/?create=${encodeURIComponent(newPseudo)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showStatusMessage(data.error, "error");
+                return;
+            }
+
+            pseudo = data.pseudo;
+            uid = data.uid;
+            localStorage.setItem("pseudo", pseudo);
+            localStorage.setItem("uid", uid);
+
+            updateProfileDisplay();
+            showStatusMessage("Nouveau compte créé avec succès!", "success");
+            startLeaderboardUpdates();
+            startScoreSubmitInterval();
+        })
+        .catch(error => {
+            showStatusMessage("Erreur de connexion au serveur", "error");
+            console.error("Error:", error);
+        });
+}
+
+function fetchAccount() {
+    const fetchUid = document.getElementById("fetchUid").value.trim();
+    if (!fetchUid) {
+        showStatusMessage("Veuillez entrer un UID valide", "error");
+        return;
+    }
+
+    fetch(`leaderboard/?fetch=${encodeURIComponent(fetchUid)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showStatusMessage(data.error, "error");
+                return;
+            }
+
+            pseudo = data.pseudo;
+            uid = data.uid;
+            localStorage.setItem("pseudo", pseudo);
+            localStorage.setItem("uid", uid);
+
+            document.getElementById("profileScore").textContent = data.score || 0;
+            updateProfileDisplay();
+            showStatusMessage("Compte récupéré avec succès!", "success");
+            startLeaderboardUpdates();
+            startScoreSubmitInterval();
+        })
+        .catch(error => {
+            showStatusMessage("Erreur de connexion au serveur", "error");
+            console.error("Error:", error);
+        });
+}
+
+function skipAccount() {
+    pseudo = "Guest";
+    uid = "";
+    localStorage.removeItem("pseudo");
+    localStorage.removeItem("uid");
+    pseudoSubmitted = true;
+    updateProfileDisplay();
+    hidePseudoForm();
+    startLeaderboardUpdates();
+}
+
+function showStatusMessage(message, type) {
+    const statusElement = document.getElementById("profile-status");
+    statusElement.textContent = message;
+    statusElement.style.color = type === "error" ? "red" : "green";
+
+    setTimeout(() => {
+        statusElement.textContent = "";
+    }, 5000);
+}
+
+function fetchUserData() {
+    if (!uid) return;
+
+    fetch(`leaderboard/?fetch=${encodeURIComponent(uid)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.error) {
+                document.getElementById("profileScore").textContent = data.score || 0;
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching user data:", error);
+        });
+}
+
+function startLeaderboardUpdates() {
+    updateLeaderboard();
+
+    if (leaderboardInterval) {
+        clearInterval(leaderboardInterval);
+    }
+
+    leaderboardInterval = setInterval(() => {
+        if (!gamePaused && !gameOver) {
+            updateLeaderboard();
+        }
+    }, 10000);
+}
+
+function startScoreSubmitInterval() {
+    if (scoreSubmitInterval) {
+        clearInterval(scoreSubmitInterval);
+    }
+
+    scoreSubmitInterval = setInterval(() => {
+        if (!gamePaused && !gameOver && score > lastSubmittedScore && uid) {
+            submitScore();
+        }
+    }, 15000);
 }
 
 function restartGame() {
@@ -201,7 +331,7 @@ restartButton.addEventListener("click", restartGame);
 
 function update() {
     if (gameOver || gamePaused) return;
-    
+
     adjustDifficulty();
 
     patate.velocityY += patate.gravity;
@@ -229,7 +359,7 @@ function update() {
                 plat.y = -10;
                 plat.x = Math.random() * (canvas.width - 80);
                 plat.type = Math.random() > 0.8 ? "boost" : "normal";
-                plat.touched = false; 
+                plat.touched = false;
                 let lastPlatform = platforms.reduce((a, b) => (a.y < b.y ? a : b));
 
                 let newY = lastPlatform.y - (minSpacing + Math.random() * (maxSpacing - minSpacing));
@@ -260,7 +390,7 @@ function update() {
             patate.velocityY > 0 &&
             patate.y + patate.height > plat.y &&
             patate.y + patate.height - patate.velocityY <= plat.y &&
-            patate.x + patate.width > plat.x && 
+            patate.x + patate.width > plat.x &&
             patate.x < plat.x + plat.width
         ) {
             if (!plat.touched) {
@@ -270,7 +400,7 @@ function update() {
                     score += 1;
                 }
                 plat.touched = true;
-                document.getElementById("score").textContent = "Score : " + score;
+                document.getElementById("score").textContent = score;
             }
 
             patate.y = plat.y - patate.height;
@@ -311,3 +441,92 @@ function draw() {
 patateImg.onload = () => {
     update();
 };
+
+function showPseudoForm() {
+    const pseudoForm = document.getElementById("pseudoForm");
+    pseudoForm.style.display = "block";
+}
+
+function hidePseudoForm() {
+    const pseudoForm = document.getElementById("pseudoForm");
+    pseudoForm.style.display = "none";
+}
+
+document.getElementById("submitPseudo").addEventListener("click", () => {
+    const newPseudo = document.getElementById("pseudo").value.trim();
+    if (newPseudo) {
+        fetch(`leaderboard/?create=${encodeURIComponent(newPseudo)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                pseudo = data.pseudo;
+                uid = data.uid;
+                localStorage.setItem("pseudo", pseudo);
+                localStorage.setItem("uid", uid);
+
+                pseudoSubmitted = true;
+                hidePseudoForm();
+                updateProfileDisplay();
+                startLeaderboardUpdates();
+                startScoreSubmitInterval();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Erreur lors de la création du compte. Veuillez réessayer.");
+            });
+    }
+});
+
+function submitScore() {
+    if (uid && score > 0) {
+        const formData = new FormData();
+        formData.append("uid", uid);
+        formData.append("score", score);
+
+        fetch("leaderboard/", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            lastSubmittedScore = score;
+            updateLeaderboard();
+            fetchUserData();
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    }
+}
+
+function updateLeaderboard() {
+    fetch("leaderboard/")
+    .then(response => response.json())
+    .then(data => {
+        if (Array.isArray(data)) {
+            const leaderboardList = document.getElementById("leaderboard-list");
+            leaderboardList.innerHTML = "";
+
+            const topFive = data.slice(0, 5);
+
+            topFive.forEach((entry, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span>${index + 1}. ${entry.pseudo}</span><span>${entry.score}</span>`;
+
+                if (entry.pseudo.includes(pseudo)) {
+                    li.style.backgroundColor = "rgba(255, 215, 0, 0.5)";
+                    li.style.fontWeight = "bold";
+                }
+
+                leaderboardList.appendChild(li);
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+    });
+}

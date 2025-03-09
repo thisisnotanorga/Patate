@@ -1,22 +1,66 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potato</title>
-    <link href="assets/img/patate.png" rel="icon">
-    <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Potato</title>
+<link href="assets/img/patate.png" rel="icon">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <h1>🥔 Potato</h1>
-    <p>Use the left/right arrows to control the potato and climb as high as you can!</p>
-    <p>Space key to start</p>
-    <canvas id="gameCanvas"></canvas>
-    <p id="score">Score : 0</p>
-    <div id="gameOverScreen" style="display: none;">
+    <p>Use the left/right arrows | A/D to control the potato and climb as high as you can!</p>
+    <p>Space key | W to start</p>
+    <div id="pseudoForm">
+        <label for="pseudo">Enter your name:</label>
+        <input type="text" id="pseudo" name="pseudo">
+        <button id="submitPseudo">Submit</button>
+        <button id="skipPseudo">Play without account</button>
+    </div>
+    <div class="main-content">
+        <canvas id="gameCanvas"></canvas>
+        <div class="info-container">
+            <div class="score-display">
+                <h2>Score</h2>
+                <p id="score">0</p>
+            </div>
+            <div class="leaderboard-section">
+                <h2>Leaderboard</h2>
+                <ul id="leaderboard-list"></ul>
+            </div>
+            <div class="profile-section">
+                <h2>Your Profile</h2>
+                <div id="profile-info">
+                    <p>Name: <span id="profilePseudo">Guest</span></p>
+                    <p>UID: <span id="profileUid">N/A</span></p>
+                    <p>Best Score: <span id="profileScore">0</span></p>
+                </div>
+                <div id="profile-controls">
+                    <div>
+                        <label for="changePseudo">Create account:</label>
+                        <input type="text" id="changePseudo" placeholder="Enter a name">
+                        <button id="submitChangePseudo">Create account</button>
+                    </div>
+                    <div>
+                        <label for="fetchUid">Fetch an account:</label>
+                        <input type="text" id="fetchUid" placeholder="Enter an UID">
+                        <button id="submitFetchUid">Fetch</button>
+                    </div>
+                </div>
+                <div id="profile-status" style="color: green; margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="gameOverScreen">
         <h1>Game Over !</h1>
         <p>Score : <span id="finalScore">0</span></p>
         <button id="restartButton">Restart</button>
+    </div>
+    <div id="pauseMenu">
+        <h1>Game Paused</h1>
+        <p>Score: <span id="pauseScore">0</span></p>
+        <button id="continueButton">Continue</button>
+        <button id="restartFromPauseButton">Restart</button>
     </div>
     <script src="assets/js/game.js"></script>
 </body>
