@@ -1,63 +1,276 @@
 body {
-    text-align: center;
-    font-family: Arial, sans-serif;
-    background-color: #f4d03f;
-    overflow: hidden;
-    margin: 0;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  background-color: #f4d03f;
+  margin: 0;
+  padding: 20px;
 }
 
 h1 {
-    color: #d35400;
+  color: #d35400;
+}
+
+.main-content {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin: 0 auto;
 }
 
 canvas {
-    background-color: #a2d9ce;
-    display: block;
-    margin: 0 auto;
-    border: 3px solid #27ae60;
+  background-color: #a2d9ce;
+  display: block;
+  border: 3px solid #27ae60;
+  margin: 0;
+}
+
+.info-container {
+  position: absolute;
+  right: 20px;
+  top: 0;
+  width: 220px;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 15px;
+  border-radius: 10px;
+  border: 3px solid #27ae60;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.info-container::-webkit-scrollbar {
+  display: none;
+}
+
+.score-display, .leaderboard-section, .profile-section {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.score-display {
+  text-align: center;
+}
+
+.score-display h2 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  color: #d35400;
+  border-bottom: 2px solid #27ae60;
+  padding-bottom: 5px;
 }
 
 #score {
-    font-size: 24px;
-    font-weight: bold;
+  font-size: 28px;
+  font-weight: bold;
+  color: #27ae60;
+  margin: 0;
+}
+
+.leaderboard-section h2, .profile-section h2 {
+  color: #d35400;
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+  border-bottom: 2px solid #27ae60;
+  padding-bottom: 5px;
+}
+
+#leaderboard-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#leaderboard-list li {
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: rgba(39, 174, 96, 0.2);
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#leaderboard-list li:nth-child(even) {
+  background-color: rgba(39, 174, 96, 0.3);
+}
+
+#leaderboard-list li:first-child {
+  background-color: rgba(255, 215, 0, 0.3);
+  border: 1px solid gold;
 }
 
 #gameOverScreen, #pauseMenu {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    z-index: 1000;
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  z-index: 1000;
 }
 
 #gameOverScreen h1, #pauseMenu h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-    color: white;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  color: white;
 }
 
 #gameOverScreen p, #pauseMenu p {
-    font-size: 1.5em;
-    margin-bottom: 20px;
+  font-size: 1.5em;
+  margin-bottom: 20px;
 }
 
-#restartButton, #continueButton, #restartFromPauseButton {
-    padding: 10px 20px;
-    font-size: 1.2em;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 10px;
+#restartButton, #continueButton, #restartFromPauseButton, #skipPseudo {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 10px;
 }
 
-#restartButton:hover, #continueButton:hover, #restartFromPauseButton:hover {
-    background-color: #45a049;
+#restartButton:hover, #continueButton:hover, #restartFromPauseButton:hover, #skipPseudo:hover {
+  background-color: #45a049;
+}
+
+#pseudoForm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(39, 174, 96, 0.6);
+  z-index: 1000;
+  display: none;
+  max-width: 90vw;
+  width: 400px;
+  transition: all 0.3s ease;
+}
+
+#pseudoForm label {
+  font-size: 25px;
+  margin-bottom: 20px;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+#pseudoForm input[type="text"] {
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 2px solid #27ae60;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 250px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#pseudoForm input[type="text"]:focus {
+  border-color: #219653;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+  background-color: white;
+}
+
+#submitPseudo {
+  padding: 12px 25px;
+  font-size: 1rem;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#submitPseudo:hover {
+  background-color: #219653;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#submitPseudo:active {
+  background-color: #1e8449;
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+#profile-info p {
+  margin: 5px 0;
+}
+
+#profile-controls {
+  margin-top: 10px;
+}
+
+#profile-controls div {
+  margin-bottom: 10px;
+}
+
+#profile-controls input {
+  width: 100%;
+  padding: 5px;
+  margin: 5px 0;
+  border: 1px solid #27ae60;
+  border-radius: 5px;
+}
+
+#profile-controls button {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#profile-controls button:hover {
+  background-color: #219653;
+}
+
+@media (max-width: 1000px) {
+  .info-container {
+    position: relative;
+    margin: 10px auto;
+    width: 80%;
+    max-width: 400px;
+    left: auto;
+    right: auto;
+  }
+
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
 }
