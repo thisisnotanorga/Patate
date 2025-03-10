@@ -4,6 +4,9 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8");
 
+$reset_pwd = "adminpass123"; #Password for dropping lb tbl
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
@@ -24,6 +27,102 @@ $createTableQuery = "
     )
 ";
 $conn->query($createTableQuery);
+
+
+if (isset($_GET['drop']) && $_GET['drop'] === $reset_pwd) {
+    header('Content-Type: text/html; charset=UTF-8');
+    echo '<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Bye Bye LB</title>
+        <style>
+            #dropButton {
+                position: absolute;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="dropButton">Drop</button>
+        <script>
+            const button = document.getElementById("dropButton");
+            let clickCount = 0;
+            const password = "' . $reset_pwd . '";
+
+            function repositionButton() {
+                const maxWidth = window.innerWidth - 100;
+                const maxHeight = window.innerHeight - 50;
+                
+                const randomX = Math.floor(Math.random() * maxWidth);
+                const randomY = Math.floor(Math.random() * maxHeight);
+                
+                button.style.left = randomX + "px";
+                button.style.top = randomY + "px";
+            }
+
+            function updateButtonColor() {
+                const colorIntensity = Math.floor((clickCount / 10) * 255);
+                button.style.backgroundColor = `rgb(255, ${255 - colorIntensity}, ${255 - colorIntensity})`;
+            }
+
+            repositionButton();
+            
+            button.addEventListener("click", function() {
+                clickCount++;
+                updateButtonColor();
+                
+                if (clickCount < 10) {
+                    repositionButton();
+                } else {
+                    fetch(window.location.pathname + "?executeDropTable=" + password)
+                    .then(response => response.json())
+                    .then(data => {
+                        button.disabled = true;
+                        if (data.success) {
+                            alert("Yay! Table has gone boom");
+                        } else {
+                            alert("Error: " + (data.error || "Idk men"));
+                        }
+                    })
+                    .catch(error => {
+                        alert("Error");
+                    });
+                }
+            });
+        </script>
+    </body>
+    </html>';
+    exit;
+}
+
+if (isset($_GET['executeDropTable'])) {
+    if ($_GET['executeDropTable'] === $reset_pwd) {
+        try {
+            $dropQuery = "DROP TABLE IF EXISTS leaderboard";
+            $result = $conn->query($dropQuery);
+            
+            if ($result) {
+                echo json_encode(["success" => true]);
+            } else {
+                echo json_encode(["success" => false, "error" => "Échec de la suppression de la table"]);
+            }
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "error" => $e->getMessage()]);
+        }
+    } else {
+        try {
+            $result = $conn->query("SELECT pseudo, uid, score FROM leaderboard ORDER BY score DESC LIMIT 10");
+            $scores = [];
+            while ($row = $result->fetch_assoc()) {
+                $pseudoWithUid = $row['pseudo'] . ' [' . substr($row['uid'], 0, 2) . substr($row['uid'], -2) . ']';
+                $scores[] = ["pseudo" => $pseudoWithUid, "score" => $row['score']];
+            }
+            echo json_encode($scores);
+        } catch (Exception $e) {
+            echo json_encode(["error" => "Server error: " . $e->getMessage()]);
+        }
+    }
+    exit;
+}
 
 try {
     if (isset($_GET['create'])) {
