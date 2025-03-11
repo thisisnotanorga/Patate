@@ -1,0 +1,52 @@
+/*
+
+'||''|.   ..|''||   |''||''|     |     |''||''|  ..|''||   
+ ||   || .|'    ||     ||       |||       ||    .|'    ||  
+ ||...|' ||      ||    ||      |  ||      ||    ||      || 
+ ||      '|.     ||    ||     .''''|.     ||    '|.     || 
+.||.      ''|...|'    .||.   .|.  .||.   .||.    ''|...|'  
+                                                           
+                                                           
+POTATO.THESERVER.LIFE
+LICENSE GPL-3.0
+
+-------------------------------
+main.css
+-
+Main styles
+*/
+
+
+
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #f4d03f;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  h1 {
+    color: #d35400;
+  }
+  
+  .main-content {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin: 0 auto;
+  }
+  
+  canvas {
+    background-color: #a2d9ce;
+    display: block;
+    border: 3px solid #27ae60;
+    margin: 0;
+  }
+  
+  @media (max-width: 1000px) {
+    .main-content {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
