@@ -12,18 +12,26 @@ POTATO.THESERVER.LIFE
 LICENSE GPL-3.0
 
 -------------------------------
-secrets.php
+config.php
 -
-Secrets manager
+Game/credits config file
 */
 
 
 
-
+# Database configuration
 $dbHost = "dbhost";
 $dbUser = "dbuser";
 $dbPass = "dbpass";
 $dbName = "dbname";
 
+# Pasword reset for ?drop=<pass>
 $resetPassword = "adminpass123";
+
+# Anti-cheat configuration
+$newPlayersMaxScore = 300;
+$maxRateAllowed = 3.0;
+$absoluteMaxScore = 5000;
+
+
 ?>

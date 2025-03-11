@@ -20,7 +20,7 @@ Mysqli database manager
 
 
 
-require_once("secrets.php");
+require_once("config.php");
 require_once("utils.php");
 
 $conn = new mysqli($dbHost, $dbUser, $dbPass, $dbName);
@@ -36,7 +36,9 @@ function initializeDatabase($conn) {
             id INT AUTO_INCREMENT PRIMARY KEY,
             uid VARCHAR(255) NOT NULL UNIQUE,
             pseudo VARCHAR(255) NOT NULL,
-            score INT NOT NULL
+            score INT NOT NULL,
+            last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            games_played INT DEFAULT 1
         )
     ";
     $conn->query($createTableQuery);

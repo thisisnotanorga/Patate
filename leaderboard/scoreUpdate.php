@@ -21,6 +21,7 @@ Leaderboard score manager
 
 
 require_once("utils.php");
+require_once("preventUltraScore.php");
 
 
 function updateUserScore($conn, $uid, $score) {
@@ -58,6 +59,7 @@ try {
     
     $uid = isset($input['uid']) ? trim($input['uid']) : "";
     $score = isset($input['score']) ? intval($input['score']) : 0;
+    $isGameEnd = isset($input['gameEnd']) ? boolval($input['gameEnd']) : false;
 
     if (empty($uid) || !is_numeric($score)) {
         respondWithError("UID and score are required for updating");
@@ -65,14 +67,21 @@ try {
     }
 
     $existingScore = checkExistingScore($conn, $uid);
+    
+    if ($isGameEnd && $existingScore !== null) {
+        updateGameCounter($conn, $uid);
+    }
 
     if ($existingScore !== null) {
         $currentScore = intval($existingScore['score']);
-        if ($score > $currentScore) {
+        
+        if ($score > $currentScore && isScoreValid($conn, $uid, $score, $isGameEnd)) {
             updateUserScore($conn, $uid, $score);
         }
     } else {
-        createUnknownUser($conn, $uid, $score);
+        if (isScoreValid($conn, $uid, $score)) {
+            createUnknownUser($conn, $uid, $score);
+        }
     }
     
     require_once("leaderboard.php");

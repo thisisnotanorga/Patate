@@ -21,11 +21,12 @@ Leaderboard manager
 let leaderboardInterval = null;
 let scoreSubmitInterval = null;
 
-export function submitScore(uid, score) {
+export function submitScore(uid, score, gameEnd = false) {
     if (uid && score > 0) {
         const formData = new FormData();
         formData.append("uid", uid);
         formData.append("score", score);
+        formData.append("gameEnd", gameEnd);
 
         fetch("leaderboard/", {
             method: "POST",
