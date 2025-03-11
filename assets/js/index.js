@@ -33,7 +33,8 @@ import {
     skipAccount,
     showPseudoForm,
     hidePseudoForm,
-    updateProfileDisplay
+    updateProfileDisplay,
+    showStatusMessage
 } from './ui.js';
 import { 
     startLeaderboardUpdates, 
@@ -89,7 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        alert(data.error);
+                        if (data.error === "Your username contains forbidden words. Please choose a different one.") {
+                            const errorMsg = "Your username contains forbidden words. Please choose a different one.";
+                            alert(errorMsg);
+                            
+                            document.getElementById("pseudo").focus();
+                            
+                        } else {
+                            alert(data.error);
+                        }
                         return;
                     }
 
