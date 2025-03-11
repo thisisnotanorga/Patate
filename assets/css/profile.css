@@ -1,0 +1,52 @@
+/*
+
+'||''|.   ..|''||   |''||''|     |     |''||''|  ..|''||   
+ ||   || .|'    ||     ||       |||       ||    .|'    ||  
+ ||...|' ||      ||    ||      |  ||      ||    ||      || 
+ ||      '|.     ||    ||     .''''|.     ||    '|.     || 
+.||.      ''|...|'    .||.   .|.  .||.   .||.    ''|...|'  
+                                                           
+                                                           
+POTATO.THESERVER.LIFE
+LICENSE GPL-3.0
+
+-------------------------------
+profile.css
+-
+Profile section styles
+*/
+
+
+
+#profile-info p {
+    margin: 5px 0;
+  }
+  
+  #profile-controls {
+    margin-top: 10px;
+  }
+  
+  #profile-controls div {
+    margin-bottom: 10px;
+  }
+  
+  #profile-controls input {
+    width: 100%;
+    padding: 5px;
+    margin: 5px 0;
+    border: 1px solid #27ae60;
+    border-radius: 5px;
+  }
+  
+  #profile-controls button {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  #profile-controls button:hover {
+    background-color: #219653;
+  }

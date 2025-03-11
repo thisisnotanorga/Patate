@@ -1,0 +1,61 @@
+/*
+
+'||''|.   ..|''||   |''||''|     |     |''||''|  ..|''||   
+ ||   || .|'    ||     ||       |||       ||    .|'    ||  
+ ||...|' ||      ||    ||      |  ||      ||    ||      || 
+ ||      '|.     ||    ||     .''''|.     ||    '|.     || 
+.||.      ''|...|'    .||.   .|.  .||.   .||.    ''|...|'  
+                                                           
+                                                           
+POTATO.THESERVER.LIFE
+LICENSE GPL-3.0
+
+-------------------------------
+modal-screens.css
+-
+Game over and pause modal styles
+*/
+
+
+
+
+#gameOverScreen, #pauseMenu {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    z-index: 1000;
+  }
+  
+  #gameOverScreen h1, #pauseMenu h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: white;
+  }
+  
+  #gameOverScreen p, #pauseMenu p {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+  }
+  
+  #restartButton, #continueButton, #restartFromPauseButton, #skipPseudo {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+  }
+  
+  #restartButton:hover, #continueButton:hover, #restartFromPauseButton:hover, #skipPseudo:hover {
+    background-color: #45a049;
+  }
