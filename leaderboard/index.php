@@ -46,7 +46,7 @@ if (isset($_GET['drop']) && $_GET['drop'] === $reset_pwd) {
         <script>
             const button = document.getElementById("dropButton");
             let clickCount = 0;
-            const password = "' . $reset_pwd . '";
+            const password = "' . htmlspecialchars($reset_pwd, ENT_QUOTES, 'UTF-8') . '";
 
             function repositionButton() {
                 const maxWidth = window.innerWidth - 100;
@@ -73,7 +73,7 @@ if (isset($_GET['drop']) && $_GET['drop'] === $reset_pwd) {
                 if (clickCount < 10) {
                     repositionButton();
                 } else {
-                    fetch(window.location.pathname + "?executeDropTable=" + password)
+                    fetch(window.location.pathname + "?executeDropTable=" + encodeURIComponent(password))
                     .then(response => response.json())
                     .then(data => {
                         button.disabled = true;
@@ -110,12 +110,16 @@ if (isset($_GET['executeDropTable'])) {
         }
     } else {
         try {
-            $result = $conn->query("SELECT pseudo, uid, score FROM leaderboard ORDER BY score DESC LIMIT 10");
+            $stmt = $conn->prepare("SELECT pseudo, uid, score FROM leaderboard ORDER BY score DESC LIMIT 10");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
             $scores = [];
             while ($row = $result->fetch_assoc()) {
                 $pseudoWithUid = $row['pseudo'] . ' [' . substr($row['uid'], 0, 2) . substr($row['uid'], -2) . ']';
-                $scores[] = ["pseudo" => $pseudoWithUid, "score" => $row['score']];
+                $scores[] = ["pseudo" => $pseudoWithUid, "score" => intval($row['score'])];
             }
+            $stmt->close();
             echo json_encode($scores);
         } catch (Exception $e) {
             echo json_encode(["error" => "Server error: " . $e->getMessage()]);
@@ -131,7 +135,7 @@ try {
             exit;
         }
 
-        $pseudo = $_GET['create'];
+        $pseudo = trim($_GET['create']);
         $uid = uniqid();
         $initial_score = 0;
 
@@ -150,7 +154,7 @@ try {
             exit;
         }
 
-        $fetch_uid = $_GET['fetch'];
+        $fetch_uid = trim($_GET['fetch']);
 
         $stmt = $conn->prepare("SELECT pseudo, score FROM leaderboard WHERE uid = ?");
         $stmt->bind_param("s", $fetch_uid);
@@ -158,7 +162,7 @@ try {
         $result = $stmt->get_result();
 
         if ($row = $result->fetch_assoc()) {
-            echo json_encode(["uid" => $fetch_uid, "pseudo" => $row['pseudo'], "score" => $row['score']]);
+            echo json_encode(["uid" => $fetch_uid, "pseudo" => $row['pseudo'], "score" => intval($row['score'])]);
         } else {
             echo json_encode(["error" => "User not found"]);
         }
@@ -168,8 +172,13 @@ try {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $uid = $_POST['uid'] ?? "";
-        $score = intval($_POST['score'] ?? 0);
+        $input = json_decode(file_get_contents('php://input'), true);
+        if ($input === null) {
+            $input = $_POST;
+        }
+        
+        $uid = isset($input['uid']) ? trim($input['uid']) : "";
+        $score = isset($input['score']) ? intval($input['score']) : 0;
 
         if (empty($uid) || !is_numeric($score)) {
             echo json_encode(["error" => "UID and score are required for updating"]);
@@ -179,12 +188,12 @@ try {
         $stmt = $conn->prepare("SELECT score FROM leaderboard WHERE uid = ?");
         $stmt->bind_param("s", $uid);
         $stmt->execute();
-        $stmt->store_result();
-        $stmt->bind_result($existingScore);
-        $stmt->fetch();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
         $stmt->close();
 
-        if ($existingScore !== null) {
+        if ($row !== null) {
+            $existingScore = intval($row['score']);
             if ($score > $existingScore) {
                 $stmt = $conn->prepare("UPDATE leaderboard SET score = ? WHERE uid = ?");
                 $stmt->bind_param("is", $score, $uid);
@@ -200,12 +209,16 @@ try {
         }
     }
 
-    $result = $conn->query("SELECT pseudo, uid, score FROM leaderboard ORDER BY score DESC LIMIT 10");
+    $stmt = $conn->prepare("SELECT pseudo, uid, score FROM leaderboard ORDER BY score DESC LIMIT 10");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
     $scores = [];
     while ($row = $result->fetch_assoc()) {
         $pseudoWithUid = $row['pseudo'] . ' [' . substr($row['uid'], 0, 2) . substr($row['uid'], -2) . ']';
-        $scores[] = ["pseudo" => $pseudoWithUid, "score" => $row['score']];
+        $scores[] = ["pseudo" => $pseudoWithUid, "score" => intval($row['score'])];
     }
+    $stmt->close();
     echo json_encode($scores);
 } catch (Exception $e) {
     echo json_encode(["error" => "Server error: " . $e->getMessage()]);
