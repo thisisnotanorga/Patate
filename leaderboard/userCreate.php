@@ -17,13 +17,14 @@ userCreate.php
 User creation system
 */
 
-
-
-
 require_once("utils.php");
-
+require_once("nameCheck.php");
 
 function createUser($conn, $pseudo) {
+    if (containsForbiddenWord($pseudo)) {
+        return false;
+    }
+    
     $uid = uniqid();
     $initialScore = 0;
 
@@ -46,6 +47,12 @@ try {
     }
 
     $pseudo = trim($_GET['create']);
+    
+    if (containsForbiddenWord($pseudo)) {
+        respondWithError(getForbiddenWordError());
+        exit;
+    }
+    
     $result = createUser($conn, $pseudo);
     
     if ($result) {
