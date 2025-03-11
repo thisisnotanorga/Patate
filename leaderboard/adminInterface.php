@@ -22,7 +22,7 @@ Drop page gui
 
 
 
-require_once("secrets.php");
+require_once("config.php");
 
 
 function displayAdminInterface($resetPassword) {

@@ -20,7 +20,6 @@ UI Builder
 
 
 import { submitScore, updateLeaderboard, fetchUserData } from './leaderboard.js';
-import { togglePause, restartGame } from './gameCore.js';
 
 let leaderboardInterval = null;
 let scoreSubmitInterval = null;
@@ -33,17 +32,6 @@ export function initUI() {
     pauseMenu.style.display = "none";
 }
 
-export function showGameOverScreen(score) {
-    const gameOverScreen = document.getElementById("gameOverScreen");
-    const finalScoreElement = document.getElementById("finalScore");
-    
-    gameOverScreen.style.display = "block";
-    finalScoreElement.textContent = score;
-    
-    if (window.uid) {
-        submitScore(window.uid, score);
-    }
-}
 
 export function updateProfileDisplay() {
     document.getElementById("profilePseudo").textContent = window.pseudo || "Guest";

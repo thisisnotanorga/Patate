@@ -18,6 +18,7 @@ Game core file
 
 
 
+import { submitScore } from './leaderboard.js';
 
 let canvas;
 let ctx;
@@ -385,8 +386,7 @@ function showGameOverScreen() {
     finalScoreElement.textContent = score;
     
     if (window.uid) {
-        const { submitScore } = require('./leaderboard.js');
-        submitScore(window.uid, score);
+        submitScore(window.uid, score, true);
     }
 }
 

@@ -22,8 +22,6 @@ Main entry file
 import { 
     initGame, 
     startGame, 
-    restartGame, 
-    togglePause,
     setControlsActive 
 } from './gameCore.js';
 import { 
@@ -34,7 +32,6 @@ import {
     showPseudoForm,
     hidePseudoForm,
     updateProfileDisplay,
-    showStatusMessage
 } from './ui.js';
 import { 
     startLeaderboardUpdates, 
